@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(swift build:*)",
+      "Bash(codesign:*)",
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(swift package clean && swift build 2>&1)",
+      "Bash(open /Users/mxgrn/code/mxgrn/timekeeper/TaktTime.app)"
+    ]
+  }
+}
