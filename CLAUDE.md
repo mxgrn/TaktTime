@@ -10,6 +10,9 @@ TaktTime is a macOS stopwatch app built with SwiftUI using Swift Package Manager
 
 - **Build:** `swift build`
 - **Run:** `swift run`
+- **Release .app bundle:**
+  1. `swift build -c release`
+  2. Assemble `TaktTime.app/Contents/` with `MacOS/TaktTime` binary, `Info.plist`, and `Resources/AppIcon.icns` (generated from `AppIcon.iconset/` via `iconutil -c icns`)
 
 There are no tests currently configured.
 
