@@ -1,6 +1,7 @@
 # TaktTime
 
 A simple macOS stopwatch app built with SwiftUI.
+![Screenshot 2026-03-07 at 07 49 34](https://github.com/user-attachments/assets/5b84c8f2-f99e-46b0-a920-696057f98b54)
 
 ## Features
 
