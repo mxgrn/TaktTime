@@ -41,15 +41,15 @@ struct StopwatchView: View {
                 .disabled(model.isRunning || model.totalSeconds == 0)
             }
 
-            VStack(spacing: 8) {
-                HStack(spacing: 8) {
+            Grid(horizontalSpacing: 8, verticalSpacing: 8) {
+                GridRow {
                     ForEach(presets, id: \.seconds) { preset in
                         Button("+\(preset.label)") {
                             model.adjust(by: preset.seconds)
                         }
                     }
                 }
-                HStack(spacing: 8) {
+                GridRow {
                     ForEach(presets, id: \.seconds) { preset in
                         Button("-\(preset.label)") {
                             model.adjust(by: -preset.seconds)
