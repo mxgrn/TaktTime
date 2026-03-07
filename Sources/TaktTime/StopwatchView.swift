@@ -2,6 +2,7 @@ import SwiftUI
 
 struct StopwatchView: View {
     @State private var model = StopwatchModel()
+    @State private var dotBright = false
 
     private let presets: [(label: String, seconds: Int)] = [
         ("1h", 3600), ("30m", 1800), ("15m", 900), ("5m", 300)
@@ -9,9 +10,24 @@ struct StopwatchView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text(model.displayString)
-                .font(.system(size: 48, weight: .light, design: .monospaced))
-                .contentTransition(.numericText())
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(dotBright ? Color(red: 0.0, green: 1.0, blue: 0.0) : .green)
+                    .shadow(color: dotBright ? .green : .clear, radius: 6)
+                    .frame(width: 12, height: 12)
+                    .opacity(model.isRunning ? (dotBright ? 1 : 0.3) : 0)
+                    .animation(.easeOut(duration: 0.5), value: dotBright)
+                    .onChange(of: model.totalSeconds) {
+                        dotBright = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            dotBright = false
+                        }
+                    }
+
+                Text(model.displayString)
+                    .font(.system(size: 48, weight: .light, design: .monospaced))
+                    .contentTransition(.numericText())
+            }
 
             HStack(spacing: 16) {
                 Button(model.isRunning ? "Stop" : "Start") {
