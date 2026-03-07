@@ -4,9 +4,10 @@ A simple macOS stopwatch app built with SwiftUI.
 
 ## Features
 
-- Start/stop/reset stopwatch with keyboard shortcut (Space)
+- Start/stop stopwatch (Space)
+- Reset with confirmation (R)
 - Adjust time with preset buttons (+/- 1h, 30m, 15m, 5m)
-- Pulsing indicator when the timer is running
+- Pulsing green indicator when the timer is running
 
 ## Requirements
 

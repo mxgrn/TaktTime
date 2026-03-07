@@ -3,6 +3,7 @@ import SwiftUI
 struct StopwatchView: View {
     @State private var model = StopwatchModel()
     @State private var dotBright = false
+    @State private var showResetConfirmation = false
 
     private let presets: [(label: String, seconds: Int)] = [
         ("1h", 3600), ("30m", 1800), ("15m", 900), ("5m", 300)
@@ -36,9 +37,17 @@ struct StopwatchView: View {
                 .keyboardShortcut(.space, modifiers: [])
 
                 Button("Reset") {
-                    model.reset()
+                    showResetConfirmation = true
                 }
+                .keyboardShortcut("r", modifiers: [])
                 .disabled(model.isRunning || model.totalSeconds == 0)
+                .alert("Reset the stopwatch?", isPresented: $showResetConfirmation) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Reset", role: .destructive) {
+                        model.reset()
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
             }
 
             Grid(horizontalSpacing: 8, verticalSpacing: 8) {
