@@ -11,7 +11,9 @@
       "Bash(iconutil -c icns /Users/mxgrn/code/mxgrn/TaktTime/AppIcon.iconset -o /Users/mxgrn/code/mxgrn/TaktTime/TaktTime.app/Contents/Resources/AppIcon.icns 2>&1)",
       "Bash(mkdir -p /Users/mxgrn/code/mxgrn/TaktTime/TaktTime.app/Contents/Resources && iconutil -c icns /Users/mxgrn/code/mxgrn/TaktTime/AppIcon.iconset -o /Users/mxgrn/code/mxgrn/TaktTime/TaktTime.app/Contents/Resources/AppIcon.icns 2>&1)",
       "Bash(git status -u && git log --oneline -5)",
-      "Bash(ditto -c -k --keepParent TaktTime.app TaktTime.app.zip 2>&1)"
+      "Bash(ditto -c -k --keepParent TaktTime.app TaktTime.app.zip 2>&1)",
+      "Bash(iconutil -c icns /Users/mxgrn/code/mxgrn/TaktTime/AppIcon.iconset -o /Users/mxgrn/code/mxgrn/TaktTime/TaktTime.app/Contents/Resources/AppIcon.icns)",
+      "Bash(cp /Users/mxgrn/code/mxgrn/TaktTime/.build/arm64-apple-macosx/release/TaktTime /Users/mxgrn/code/mxgrn/TaktTime/TaktTime.app/Contents/MacOS/TaktTime)"
     ]
   }
 }
