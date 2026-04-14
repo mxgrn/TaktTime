@@ -20,6 +20,19 @@ There are no tests currently configured.
 
 Single-target SwiftUI app (`Sources/TaktTime/`):
 
-- **TaktTimeApp.swift** - App entry point. Forces regular activation policy (dock icon) and fixed window size.
+- **TaktTimeApp.swift** - App entry point. Forces regular activation policy (dock icon) and fixed window size. Uses `Window` (not `WindowGroup`) — this is critical to ensure only one `StopwatchModel` instance exists. Multiple instances would race on the shared state files.
 - **StopwatchModel.swift** - `@Observable` model tracking elapsed time in seconds with Timer-based counting. All state is `@MainActor`.
 - **StopwatchView.swift** - Main UI with time display, start/stop/reset controls, and preset time adjustment buttons (+/- 1h, 30m, 15m, 5m).
+
+## State Persistence Requirements
+
+State is persisted to `~/Library/Application Support/TaktTime/` using **two separate files** — this separation is load-bearing, do not combine them:
+
+- **`seconds`** — contains only the integer totalSeconds. Written from `didSet` on totalSeconds (every timer tick and every adjustment).
+- **`running`** — contains "true" or "false". Written **only** by `start()` and `stop()`. Timer ticks must never write to this file.
+
+Behavioral rules:
+
+- **Restart:** On relaunch, restore the exact totalSeconds and isRunning state from the files. Do NOT add any elapsed wall-clock time — the timer only counts while the app process is alive and the Timer is firing.
+- **Sleep/wake:** The timer does not count time while the display is off (lid closed). On `screensDidSleepNotification`, invalidate the timer. On `screensDidWakeNotification`, re-create it if still in running state. Do not use system sleep/wake notifications (they fire too late after lid close).
+- **Normal ticking:** Each timer fire increments totalSeconds by 1. Do not calculate elapsed time between fires.

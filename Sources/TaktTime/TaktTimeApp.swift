@@ -11,7 +11,7 @@ struct TaktTimeApp: App {
     }
 
     var body: some Scene {
-        WindowGroup {
+        Window("TaktTime", id: "main") {
             StopwatchView()
         }
         .windowResizability(.contentSize)

@@ -4,12 +4,19 @@ import SwiftUI
 @MainActor
 @Observable
 final class StopwatchModel {
-    private static let totalSecondsKey = "totalSeconds"
-    private static let isRunningKey = "isRunning"
-    private static let lastTickKey = "lastTickDate"
+    private static let dir: URL = {
+        let d = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("TaktTime", isDirectory: true)
+        try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
+        return d
+    }()
+    private static let secondsFile = dir.appendingPathComponent("seconds")
+    private static let runningFile = dir.appendingPathComponent("running")
 
     var totalSeconds: Int = 0 {
-        didSet { save() }
+        didSet {
+            try? "\(totalSeconds)".write(to: Self.secondsFile, atomically: true, encoding: .utf8)
+        }
     }
     var isRunning: Bool = false
 
@@ -24,25 +31,37 @@ final class StopwatchModel {
     private var timer: Timer?
 
     init() {
-        let defaults = UserDefaults.standard
-        let saved = defaults.integer(forKey: Self.totalSecondsKey)
-        let wasRunning = defaults.bool(forKey: Self.isRunningKey)
-
-        if wasRunning, let lastTick = defaults.object(forKey: Self.lastTickKey) as? Date {
-            let elapsed = Int(Date().timeIntervalSince(lastTick))
-            totalSeconds = saved + max(0, elapsed)
+        if let s = try? String(contentsOf: Self.secondsFile, encoding: .utf8), let n = Int(s) {
+            totalSeconds = n
+        }
+        if let r = try? String(contentsOf: Self.runningFile, encoding: .utf8), r == "true" {
             start()
-        } else {
-            totalSeconds = saved
         }
 
-        NotificationCenter.default.addObserver(
-            forName: NSApplication.willTerminateNotification,
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.screensDidSleepNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated {
-                self?.save()
+                guard let self, self.isRunning else { return }
+                self.timer?.invalidate()
+                self.timer = nil
+            }
+        }
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.screensDidWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.isRunning, self.timer == nil else { return }
+                self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+                    Task { @MainActor in
+                        self?.totalSeconds += 1
+                    }
+                }
             }
         }
     }
@@ -54,7 +73,7 @@ final class StopwatchModel {
     func start() {
         guard !isRunning else { return }
         isRunning = true
-        save()
+        try? "true".write(to: Self.runningFile, atomically: true, encoding: .utf8)
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.totalSeconds += 1
@@ -66,7 +85,7 @@ final class StopwatchModel {
         isRunning = false
         timer?.invalidate()
         timer = nil
-        save()
+        try? "false".write(to: Self.runningFile, atomically: true, encoding: .utf8)
     }
 
     func reset() {
@@ -76,16 +95,5 @@ final class StopwatchModel {
 
     func adjust(by seconds: Int) {
         totalSeconds = max(0, totalSeconds + seconds)
-    }
-
-    private func save() {
-        let defaults = UserDefaults.standard
-        defaults.set(totalSeconds, forKey: Self.totalSecondsKey)
-        defaults.set(isRunning, forKey: Self.isRunningKey)
-        if isRunning {
-            defaults.set(Date(), forKey: Self.lastTickKey)
-        } else {
-            defaults.removeObject(forKey: Self.lastTickKey)
-        }
     }
 }
